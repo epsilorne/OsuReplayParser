@@ -70,6 +70,7 @@
         /// </summary>
         /// <param name="type">ModType.</param>
         /// <returns>The ModType's abbreviation.</returns>
+        /// TODO: do for rest of mods
         public static string ToStringAbbrev(this ModType type)
         {
             switch (type)

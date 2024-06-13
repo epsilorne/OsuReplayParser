@@ -1,5 +1,6 @@
 ﻿using OsuReplayParser.Enums;
 using OsuReplayParser.Objects;
+using System.Text;
 
 namespace OsuReplayParser.Parser
 {
@@ -46,6 +47,35 @@ namespace OsuReplayParser.Parser
                             replay.DateSet = new DateTime(reader.ReadInt64(), DateTimeKind.Local);
 
                             replay.ReplayDataLength = reader.ReadInt32();
+
+                            // LZMA Decompression
+                            replay.Frames = new List<ReplayFrame>();
+                            byte[] rawReplayData = reader.ReadBytes(replay.ReplayDataLength);
+                            byte[] decompressedData = Util.Decompress(rawReplayData);
+                            string[] frames = Encoding.ASCII.GetString(decompressedData).Split(',');
+                            long currentMs = 0;
+
+                            for (int i = 0; i < frames.Length; i++)
+                            {
+                                string[] frameInfo = frames[i].Split('|');
+                                
+                                long prevMs = (long) Convert.ToDouble(frameInfo[0]);
+                                float currentX = (float) Convert.ToDouble(frameInfo[1]);
+                                float currentY = (float) Convert.ToDouble(frameInfo[2]);
+                                int keyPresses = Convert.ToInt32(frameInfo[3]);
+
+                                // Send the replay seed if we get -12345|0|0|seed
+                                if (frameInfo[0] == "-12345")
+                                {
+                                    replay.Seed = Convert.ToInt32(frameInfo[3]);
+                                    break;
+                                }
+
+                                ReplayFrame rf = new ReplayFrame(currentMs, prevMs, currentX, currentY, keyPresses);
+                                replay.Frames.Add(rf);
+
+                                currentMs += prevMs;
+                            }
 
                         }
                         catch (Exception ex)

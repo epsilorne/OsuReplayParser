@@ -26,9 +26,10 @@ namespace OsuReplayParser.Objects
         public DateTime DateSet { get; set; }
 
         public int ReplayDataLength { get; set; }
-        public byte[] CompressedReplayData { get; set; }
+        public List<ReplayFrame> Frames { get; set; }
 
         public long OnlineScoreID { get; set; }
+        public int Seed { get; set; }
         public double AdditionalModInfo { get; set; }
     }
 }

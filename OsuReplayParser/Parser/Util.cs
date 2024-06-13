@@ -1,6 +1,8 @@
-﻿using System;
+﻿using SevenZip.Compression.LZMA;
+using System;
 using System.IO;
 using System.Text;
+using Decoder = SevenZip.Compression.LZMA.Decoder;
 
 namespace OsuReplayParser.Parser
 {
@@ -50,6 +52,36 @@ namespace OsuReplayParser.Parser
             while ((currentByte & 0x80) != 0);
 
             return val;
+        }
+
+        /// <summary>
+        /// Decompresses an array of bytes using the LZMA algorithm.
+        /// </summary>
+        /// <param name="input">Input array of bytes.</param>
+        /// <returns>Decompressed array of bytes.</returns>
+        public static byte[] Decompress(byte[] input)
+        {
+            Decoder decoder = new Decoder();
+
+            using (Stream inStream = new MemoryStream(input, false))
+            {
+                MemoryStream outStream = new MemoryStream();
+
+                // Get properties used during the original compression
+                byte[] properties = new byte[5];
+                inStream.Read(properties, 0, 5);
+                decoder.SetDecoderProperties(properties);
+
+                // Get length of the output
+                byte[] outputLengthBytes = new byte[8];
+                inStream.Read(outputLengthBytes, 0, 8);
+                long outputLength = BitConverter.ToInt64(outputLengthBytes, 0);
+
+                decoder.Code(inStream, outStream, inStream.Length, outputLength, null);
+                outStream.Flush();
+
+                return outStream.ToArray();
+            }
         }
     }
 }
