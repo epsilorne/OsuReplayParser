@@ -8,15 +8,20 @@ namespace OsuReplayParser.Enums
 {
    public enum Keypress
     {
-        M1 = 1,
-        M2 = 2,
-        K1 = 5,
-        K2 = 10,
-        Smoke = 16
+        M1 = (1 << 0),
+        M2 = (1 << 1),
+        K1 = (1 << 2) | (1 << 0),
+        K2 = (1 << 3) | (1 << 1),
+        Smoke = (1 << 4)
     }
 
     public static class Keys
     {
+        /// <summary>
+        /// Returns a list of keys pressed.
+        /// </summary>
+        /// <param name="encoding">Encoding from a replay frame.param>
+        /// <returns>Keys pressed as a list.</returns>
         public static List<Keypress> GetKeysPressed(int encoding)
         {
             List<Keypress> results = new List<Keypress>();

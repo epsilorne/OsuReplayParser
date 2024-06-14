@@ -22,7 +22,7 @@ namespace OsuReplayParser.Objects
         public bool PerfectFullCombo { get; set; }
         public List<ModType> ModsUsed { get; set; }
 
-        public string LifebarGraph { get; set; }
+        public List<LifeBarEntry> LifeBarGraph { get; set; }
         public DateTime DateSet { get; set; }
 
         public int ReplayDataLength { get; set; }

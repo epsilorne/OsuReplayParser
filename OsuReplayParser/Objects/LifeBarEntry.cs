@@ -1,8 +1,19 @@
 ﻿namespace OsuReplayParser.Objects
 {
-    class LifeBarEntry
+    public class LifeBarEntry
     {
-        int Time { get; set; }
-        float Health { get; set; }
+        public int Time { get; set; }
+        public float Health { get; set; }
+
+        public LifeBarEntry(int time, float health)
+        {
+            this.Time = time;
+            this.Health = health;
+        }
+
+        public override string ToString()
+        {
+            return "[Time: " + Time + ", HP: " + Health + "]";
+        }
     }
 }

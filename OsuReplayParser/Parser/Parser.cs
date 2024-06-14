@@ -4,7 +4,7 @@ using System.Text;
 
 namespace OsuReplayParser.Parser
 {
-    class Parser
+    public static class Parser
     {
         /// <summary>
         /// Parse .osr file.
@@ -12,13 +12,12 @@ namespace OsuReplayParser.Parser
         /// <param name="filePath">File path of the replay.</param>
         /// <returns>Replay object.</returns>
         /// <exception cref="FileNotFoundException"></exception>
-        public Replay ParseReplay(String filePath)
+        public static Replay ParseReplay(String filePath)
         {
             if (File.Exists(filePath))
             {
                 Replay replay = new Replay();
 
-                // TODO: parse rest of file (including replay data)
                 using(var stream = File.Open(filePath, FileMode.Open))
                 {
                     using(var reader = new BinaryReader(stream))
@@ -43,7 +42,22 @@ namespace OsuReplayParser.Parser
                             replay.PerfectFullCombo = reader.ReadByte() == 1;
                             replay.ModsUsed = Mod.GetModsList(reader.ReadInt32());
 
-                            replay.LifebarGraph = reader.ReadOsrString();
+                            // Life bar parsing
+                            replay.LifeBarGraph = new List<LifeBarEntry>();
+                            string[] lifebarEntries = reader.ReadOsrString().Split(',');
+                            foreach(string entry in lifebarEntries)
+                            {
+                                if(entry == "")
+                                {
+                                    break;
+                                }
+
+                                string[] values = entry.Split("|");
+                                int time = Convert.ToInt32(values[0]);
+                                float health = (float) Convert.ToDouble(values[1]);
+                                replay.LifeBarGraph.Add(new LifeBarEntry(time, health));
+                            }
+
                             replay.DateSet = new DateTime(reader.ReadInt64(), DateTimeKind.Local);
 
                             replay.ReplayDataLength = reader.ReadInt32();
@@ -77,6 +91,11 @@ namespace OsuReplayParser.Parser
                                 currentMs += prevMs;
                             }
 
+                            replay.OnlineScoreID = reader.ReadInt64();
+                            if (replay.ModsUsed.Contains(ModType.TargetPractice))
+                            {
+                                replay.AdditionalModInfo = reader.ReadDouble();
+                            }
                         }
                         catch (Exception ex)
                         {
